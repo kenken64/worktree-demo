@@ -4,11 +4,26 @@ A single Git repository hosting three independent projects — **backend**, **fr
 
 ## Disk Layout
 
+### Worktree branches (side-by-side directories)
+
 ```
 git-demo/
 ├── worktree/    ← backend branch  (server.js)
 ├── frontend/    ← frontend branch (index.html)
 └── cli/         ← cli branch      (cli.js)
+```
+
+### Main branch (monorepo)
+
+```
+main/
+├── README.md
+├── backend/
+│   └── server.js
+├── frontend/
+│   └── index.html
+└── cli/
+    └── cli.js
 ```
 
 ## Step-by-Step Setup
@@ -167,20 +182,17 @@ Expected output:
 **Start the backend:**
 
 ```bash
-cd worktree
-node server.js
+node backend/server.js
 ```
 
 **Open the frontend:**
 
 ```bash
-cd frontend
-open index.html    # or just open the file in a browser
+open frontend/index.html    # or just open the file in a browser
 ```
 
 **Run the CLI:**
 
 ```bash
-cd cli
-node cli.js
+node cli/cli.js
 ```
