@@ -1,8 +1,30 @@
 # Multi-Project Git Repo Using Worktrees
 
-A single Git repository hosting three independent projects — **backend**, **frontend**, and **cli** — each living on its own orphan branch and checked out as a separate worktree directory.
+A single Git repository hosting three independent projects — **backend**, **frontend**, and **cli** — each living on its own orphan branch and checked out as a separate worktree directory. A **main** branch aggregates all projects into a monorepo layout.
+
+## Branch Overview
+
+| Branch | Purpose | File(s) |
+|--------|---------|---------|
+| `main` | Monorepo combining all projects | `backend/server.js`, `frontend/index.html`, `cli/cli.js` |
+| `backend` | HTTP server (`GET /api`) | `server.js` |
+| `frontend` | Web app that fetches from backend | `index.html` |
+| `cli` | CLI tool that prints backend response | `cli.js` |
 
 ## Disk Layout
+
+### Main branch (monorepo)
+
+```
+worktree-demo/
+├── README.md
+├── backend/
+│   └── server.js
+├── frontend/
+│   └── index.html
+└── cli/
+    └── cli.js
+```
 
 ### Worktree branches (side-by-side directories)
 
@@ -11,19 +33,6 @@ git-demo/
 ├── worktree/    ← backend branch  (server.js)
 ├── frontend/    ← frontend branch (index.html)
 └── cli/         ← cli branch      (cli.js)
-```
-
-### Main branch (monorepo)
-
-```
-main/
-├── README.md
-├── backend/
-│   └── server.js
-├── frontend/
-│   └── index.html
-└── cli/
-    └── cli.js
 ```
 
 ## Step-by-Step Setup
@@ -147,17 +156,38 @@ git add cli.js
 git commit -m "Add CLI tool that calls backend and prints response"
 ```
 
-### Step 5 — Switch Back to `backend`
+### Step 5 — Create the `main` Branch (Monorepo)
+
+Create an orphan `main` branch and pull files from all three branches into subdirectories.
+
+```bash
+git checkout --orphan main
+git rm --cached -r .
+```
+
+Checkout files from each branch into their respective subdirectories:
+
+```bash
+mkdir -p backend frontend cli
+git checkout backend -- server.js
+git checkout frontend -- index.html
+git checkout cli -- cli.js
+mv server.js backend/
+mv index.html frontend/
+mv cli.js cli/
+```
+
+Stage and commit:
+
+```bash
+git add -A
+git commit -m "Add main branch as monorepo with subfolders"
+```
+
+### Step 6 — Switch to `backend` and Create Worktrees
 
 ```bash
 git checkout backend
-```
-
-### Step 6 — Create Worktrees
-
-Check out the `frontend` and `cli` branches as separate directories alongside the main worktree.
-
-```bash
 git worktree add ../frontend frontend
 git worktree add ../cli cli
 ```
@@ -172,27 +202,42 @@ git log --all --oneline --decorate
 Expected output:
 
 ```
-/path/to/git-demo/worktree  e99039a [backend]
-/path/to/git-demo/frontend  b227a4d [frontend]
-/path/to/git-demo/cli       460b313 [cli]
+/path/to/git-demo/worktree   [backend]
+/path/to/git-demo/frontend   [frontend]
+/path/to/git-demo/cli        [cli]
+```
+
+### Step 8 — Push All Branches to Remote
+
+```bash
+git remote add origin https://github.com/kenken64/worktree-demo.git
+git push -u origin backend frontend cli main
 ```
 
 ## Running the Projects
 
-**Start the backend:**
+### From worktree directories
 
 ```bash
+# Start the backend (from worktree/)
+node server.js
+
+# Open the frontend (from frontend/)
+open index.html
+
+# Run the CLI (from cli/)
+node cli.js
+```
+
+### From main branch (monorepo)
+
+```bash
+# Start the backend
 node backend/server.js
-```
 
-**Open the frontend:**
+# Open the frontend
+open frontend/index.html
 
-```bash
-open frontend/index.html    # or just open the file in a browser
-```
-
-**Run the CLI:**
-
-```bash
+# Run the CLI
 node cli/cli.js
 ```
